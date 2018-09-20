@@ -66,3 +66,27 @@ func (g *ginS) Get(key string) (string, error) {
 	}
 	return value, nil
 }
+
+/*
+获取值后立即删除
+*/
+func (g *ginS) GetFree(key string) (string, error) {
+	si, err := g.ctx.Cookie(sf.cookieName)
+	if err != nil {
+		return "", err
+	}
+	value, ok := xrdb.HMGet(si, key)
+	if !ok {
+		return "", session_expire_err
+	}
+	xrdb.HDel(si, key)
+	return value, nil
+}
+
+func (g *ginS) Del(key string) {
+	si, err := g.ctx.Cookie(sf.cookieName)
+	if err != nil {
+		return
+	}
+	xrdb.HDel(si, key)
+}
